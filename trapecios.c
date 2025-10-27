@@ -100,12 +100,6 @@ int main(int argc, char *argv[]) {
 
             // Medimos el final del código
             final=MPI_Wtime()-inicio;
-
-            // Imprimimos resultados y finalizamos la ejecución
-            printf("\nSoy %d y el tiempo que tardé fue: %lf\n", rank,final);
-
-            if(rank==0) printf("\nEl e calculado es: %Lf\n", 1+eDefinitivo);
-
             break;
 
         // Los impares se lo mandan al par inferior
@@ -157,12 +151,6 @@ int main(int argc, char *argv[]) {
 
             // Medimos el final del código
             final=MPI_Wtime()-inicio;
-
-            // Imprimimos resultados y finalizamos la ejecución
-            printf("\nSoy %d y el tiempo que tardé fue: %lf\n", rank,final);
-
-            if(rank==0) printf("\nEl e calculado es: %Lf\n", 1+eDefinitivo);
-
             break;
 
         case 2:
@@ -227,14 +215,6 @@ int main(int argc, char *argv[]) {
 
             // Medimos el final del código
             final=MPI_Wtime()-inicio;
-
-            // Imprimimos resultados y finalizamos la ejecución
-            printf("\nSoy %d y el tiempo que tardé fue: %lf\n", rank,final);
-
-            error=e-(1+eDefinitivo);
-
-            if(rank==0) printf("\nEl e calculado es: %Lf y con error: %.12Lf\n", 1+eDefinitivo, error);
-
             break;
 
         default:
@@ -244,7 +224,20 @@ int main(int argc, char *argv[]) {
             break;
     }
 
+    error=e-(1+eDefinitivo);
+
     //Espacio para el print en el archivo
+    //Se almacenan los datos de cada nodo: np,yo,Version,Generar,Tiempo
+    FILE *fichero;
+    fichero = fopen("Datos_nodos.csv", "a");
+    fprintf(fichero, "%d,%d,%d,%d,%.15lf\n", size, rank, metodo, divisiones, final-inicio);
+
+    //Se almacenan los datos globales: np,Version,Generar,Tiempo,e,Error
+    if(rank == 0){
+
+        fichero = fopen("Datos_nodo0.csv", "a");
+        fprintf(fichero, "%d,%d,%d,%.15lf,%.15Lf,%.15Lf\n", size, metodo, divisiones, final-inicio, eDefinitivo+1, fabsl(error));
+    }
 
     MPI_Finalize();
     return 0;
