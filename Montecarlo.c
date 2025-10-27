@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     int np, yo;
 
     //Variable para almacenar cuantos números caen dentro de la integral
-    int hit = 0;
+    long hit = 0;
 
     //Variable para almacenar el f(x) generado en cada iteración
     long double f;
@@ -55,6 +55,9 @@ int main(int argc, char *argv[]) {
     long double min = n*yo;
     long double max = n*(yo+1);
 
+    //Variable para ir sumando los e parciales recibidos
+    long double suma;
+
     //Se inicia el generador de números aleatorios, cada nodo una semilla diferente
     srand48((yo+1)*time(0));
 
@@ -76,7 +79,7 @@ int main(int argc, char *argv[]) {
 
         }else{
             long double recv = 0;
-            long double suma = eParcial;
+            suma = eParcial;
             MPI_Status status;
 
             int num_recv = (np - yo - 1 >= 3) ? 3 : (np - yo - 1);
@@ -94,7 +97,6 @@ int main(int argc, char *argv[]) {
                     MPI_Recv(&recv, 1, MPI_LONG_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                     suma += recv;
                 }
-                printf("El valor aproximado de e es %LF\n", suma+1);
             }
         }
 
@@ -106,7 +108,7 @@ int main(int argc, char *argv[]) {
 
         }else{
             long double recv = 0;
-            long double suma = eParcial;
+            suma = eParcial;
             MPI_Status status;
             MPI_Recv(&recv, 1, MPI_LONG_DOUBLE, yo+1, yo+1, MPI_COMM_WORLD, &status);
             suma += recv;
@@ -119,7 +121,6 @@ int main(int argc, char *argv[]) {
                     MPI_Recv(&recv, 1, MPI_LONG_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                     suma += recv;
                 }
-                printf("El valor aproximado de e es %LF\n", suma+1);
             }
         }
     //version 0
@@ -130,19 +131,29 @@ int main(int argc, char *argv[]) {
 
         }else{
             long double recv = 0;
-            long double suma = eParcial;
+            suma = eParcial;
             MPI_Status status;
             for(int i = 1; i < np; i++){
                 MPI_Recv(&recv, 1, MPI_LONG_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 suma += recv;
             }
-            printf("El valor aproximado de e es %LF\n", suma+1);
         }
     }
 
     //Se toma el tiempo final
     long double fin = MPI_Wtime();
-    printf("Tiempo de ejecución del nodo %d: %LF segundos\n", yo, fin - inicio);
+
+    //Se almacenan los datos de cada nodo: np,yo,Version,Generar,Tiempo
+    FILE *fichero;
+    fichero = fopen("Datos_nodos.csv", "a");
+    fprintf(fichero, "%d,%d,%d,%ld,%.15LF\n", np, yo, version, generar, fin-inicio);
+
+    //Se almacenan los datos globales: np,Version,Generar,Tiempo,e,Error
+    if(yo == 0){
+
+        fichero = fopen("Datos_nodo0.csv", "a");
+        fprintf(fichero, "%d,%d,%ld,%.15LF,%.15LF,%.15LF\n", np, version, generar, fin-inicio, suma+1, fabsl(suma+1-e));
+    }
 
     MPI_Finalize();
 
@@ -154,4 +165,6 @@ long double aleatorio(long double min, long double max) {
     long double r = (long double)drand48();
     return min + r * (max - min);
 }
+
+
 
