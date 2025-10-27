@@ -8,6 +8,7 @@
 
 // Declaración de variables globales
 long double e=2.7182818284590452353602874713526624977572471;
+long double pi=3.1415926535897932384626433832795028841971694;
 long double min=0;
 long double max=1;
 long double eCalculado=0;
@@ -24,7 +25,7 @@ double final;
 int divisiones, metodo;
 
 
-//1 + de 0 a 1 de e^t
+//4 por integral de 0 a 1 de sqrt(1-x²)
 
 int main(int argc, char *argv[]) {
 
@@ -73,12 +74,12 @@ int main(int argc, char *argv[]) {
 
             h=(max-min)/divisiones;
 
-            valor_fijo=(powf(e, min)+(powf(e, max)))/2;
+            valor_fijo=(sqrt(1-min*min)+sqrt(1-max*max))/2;
             suma=0;
 
             for(int i=1;i<divisiones-1;i++){
                 valor=min+i*h;
-                suma+=((powf(e, valor)));
+                suma+=(sqrt(1-valor*valor));
             }
 
             // Resultado de la suma individual de cada proceso
@@ -111,7 +112,6 @@ int main(int argc, char *argv[]) {
             inicio=MPI_Wtime();
 
             // Modulamos el maximo y el minimo de la integral para cada proceso
-
             max=(rank+1)/size;
             min=rank/size;
 
@@ -119,12 +119,12 @@ int main(int argc, char *argv[]) {
 
             h=(max-min)/divisiones;
 
-            valor_fijo=(powf(e, min)+(powf(e, max)))/2;
+            valor_fijo=(sqrt(1-min*min)+(sqrt(1-max*max)))/2;
             suma=0;
 
             for(int i=1;i<divisiones-1;i++){
                 valor=min+i*h;
-                suma+=((powf(e, valor)));
+                suma+=(sqrt(1-valor*valor));
             }
 
             // Resultado de la suma individual de cada proceso
@@ -169,12 +169,12 @@ int main(int argc, char *argv[]) {
 
             h=(max-min)/divisiones;
 
-            valor_fijo=(powf(e, min)+(powf(e, max)))/2;
+            valor_fijo=(sqrt(1-min*min)+(sqrt(1-max*max)))/2;
             suma=0;
 
             for(int i=1;i<divisiones-1;i++){
                 valor=min+i*h;
-                suma+=((powf(e, valor)));
+                suma+=(sqrt(1-valor*valor));
             }
 
             // Resultado de la suma individual de cada proceso
@@ -224,19 +224,19 @@ int main(int argc, char *argv[]) {
             break;
     }
 
-    error=e-(1+eDefinitivo);
+    error=pi-(4*eDefinitivo);
 
     //Espacio para el print en el archivo
     //Se almacenan los datos de cada nodo: np,yo,Version,Generar,Tiempo
     FILE *fichero;
-    fichero = fopen("Datos_nodos.csv", "a");
+    fichero = fopen("Datos_nodos_trapecios.csv", "a");
     fprintf(fichero, "%d,%d,%d,%d,%.15lf\n", size, rank, metodo, divisiones, final-inicio);
 
     //Se almacenan los datos globales: np,Version,Generar,Tiempo,e,Error
     if(rank == 0){
 
-        fichero = fopen("Datos_nodo0.csv", "a");
-        fprintf(fichero, "%d,%d,%d,%.15lf,%.15Lf,%.15Lf\n", size, metodo, divisiones, final-inicio, eDefinitivo+1, fabsl(error));
+        fichero = fopen("Datos_nodo0_trapecios.csv", "a");
+        fprintf(fichero, "%d,%d,%d,%.15lf,%.15Lf,%.15Lf\n", size, metodo, divisiones, final-inicio, 4*eDefinitivo, fabsl(error));
     }
 
     MPI_Finalize();
