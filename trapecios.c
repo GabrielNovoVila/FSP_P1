@@ -240,5 +240,6 @@ int main(int argc, char *argv[]) {
     }
 
     MPI_Finalize();
+    fclose();
     return 0;
 }
