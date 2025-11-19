@@ -224,18 +224,18 @@ int main(int argc, char *argv[]) {
 
     //Espacio para el print en el archivo
     //Se almacenan los datos de cada nodo: np,yo,Version,Generar,Tiempo
-    FILE *fichero;
-    fichero = fopen("Datos_nodos_trapecios.csv", "a");
-    fprintf(fichero, "%d,%d,%d,%d,%.15lf\n", size, rank, metodo, divisiones, final-inicio);
+    FILE *pif;
+    pif = fopen("Datos_nodos_trapecios.csv", "a");
+    fprintf(pif, "%d,%d,%d,%d,%.15lf\n", size, rank, metodo, divisiones, final-inicio);
 
     //Se almacenan los datos globales: np,Version,Generar,Tiempo,e,Error
     if(rank == 0){
 
-        fichero = fopen("Datos_nodo0_trapecios.csv", "a");
-        fprintf(fichero, "%d,%d,%d,%.15lf,%.15Lf,%.15Lf\n", size, metodo, divisiones, final-inicio, 4*eDefinitivo, fabsl(error));
+        pif = fopen("Datos_nodo0_trapecios.csv", "a");
+        fprintf(pif, "%d,%d,%d,%.15lf,%.15Lf,%.15Lf\n", size, metodo, divisiones, final-inicio, 4*eDefinitivo, fabsl(error));
     }
 
     MPI_Finalize();
-    fclose();
+    fclose(pif);
     return 0;
 }
