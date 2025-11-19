@@ -61,8 +61,6 @@ int main(int argc, char *argv[]) {
         case 0:
             // Comenzamos a medir el tiempo de la ejecución de cada proceso
 
-            MPI_Barrier(MPI_COMM_WORLD);
-
             inicio=MPI_Wtime();
 
             // Modulamos el maximo y el minimo de la integral para cada proceso
@@ -107,8 +105,6 @@ int main(int argc, char *argv[]) {
         case 1:
             // Comenzamos a medir el tiempo de la ejecución de cada proceso
 
-            MPI_Barrier(MPI_COMM_WORLD);
-
             inicio=MPI_Wtime();
 
             // Modulamos el maximo y el minimo de la integral para cada proceso
@@ -143,8 +139,10 @@ int main(int argc, char *argv[]) {
             }else if(rank%2==1){ 
                 MPI_Send(&miParte, 1, MPI_LONG_DOUBLE, rank-1, 0, MPI_COMM_WORLD);
             }else{
-                MPI_Recv(&datos_recibidos[0],1,MPI_LONG_DOUBLE,rank+1,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                miParte+=datos_recibidos[0];
+                if(rank!=size-1){
+                    MPI_Recv(&datos_recibidos[0],1,MPI_LONG_DOUBLE,rank+1,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    miParte+=datos_recibidos[0];
+                }
 
                 MPI_Send(&miParte, 1, MPI_LONG_DOUBLE, 0, 0, MPI_COMM_WORLD);
             }
@@ -155,8 +153,6 @@ int main(int argc, char *argv[]) {
 
         case 2:
             // Comenzamos a medir el tiempo de la ejecución de cada proceso
-
-            MPI_Barrier(MPI_COMM_WORLD);
 
             inicio=MPI_Wtime();
 
